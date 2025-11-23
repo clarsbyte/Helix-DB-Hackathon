@@ -12,6 +12,8 @@ from typing import Optional, List
 from fastapi.middleware.cors import CORSMiddleware
 import PyPDF2
 from pathlib import Path
+import requests
+import helix
 
 class Output(BaseModel):
     title: str
@@ -69,6 +71,13 @@ connection_agent = Agent(
     deps_type=str
 )
 
+db = helix.Client(local=True, verbose=True)
+
+# Initialize the database with our schema
+try:
+    db.compile()
+except Exception as e:
+    print(f"Database compile warning: {e}")
 
 def extract_pdf_text(pdf_path: str) -> str:
     """Extract text content from a PDF file."""
@@ -80,69 +89,46 @@ def extract_pdf_text(pdf_path: str) -> str:
     return text
 
 
-def run_helix_query(query_name: str, params: dict) -> dict:
-    """Execute a Helix query using the CLI"""
-    try:
-        # Build the command
-        cmd = ["helix", "query", query_name]
-
-        # Add parameters
-        for key, value in params.items():
-            if isinstance(value, str):
-                cmd.extend([f"--{key}", f'"{value}"'])
-            else:
-                cmd.extend([f"--{key}", str(value)])
-
-        # Execute the command
-        result = subprocess.run(
-            cmd,
-            capture_output=True,
-            text=True,
-            cwd="../helix"
-        )
-
-        if result.returncode == 0:
-            return {"success": True, "output": result.stdout}
-        else:
-            return {"success": False, "error": result.stderr}
-    except Exception as e:
-        return {"success": False, "error": str(e)}
-
-
 def get_all_pdfs() -> List[dict]:
     """Get all PDFs from the database"""
-    result = run_helix_query("getAllPDFs", {})
-    if result["success"]:
-        try:
-            # Parse the output - assuming JSON format
-            return json.loads(result["output"])
-        except:
-            return []
-    return []
+    try:
+        result = db.getAllPDFs()
+        return result if isinstance(result, list) else []
+    except Exception as e:
+        print(f"Error getting PDFs: {e}")
+        return []
 
 
 def add_pdf_to_db(pdf_id: int, title: str, summary: str, filename: str) -> bool:
     """Add a PDF to the Helix database"""
-    upload_date = datetime.now().isoformat()
-    result = run_helix_query("addPDF", {
-        "pdf_id": pdf_id,
-        "title": title,
-        "summary": summary,
-        "filename": filename,
-        "upload_date": upload_date
-    })
-    return result["success"]
+    try:
+        upload_date = datetime.now().isoformat()
+        db.addPDF(
+            pdf_id=pdf_id,
+            title=title,
+            summary=summary,
+            filename=filename,
+            upload_date=upload_date
+        )
+        return True
+    except Exception as e:
+        print(f"Error adding PDF: {e}")
+        return False
 
 
 def create_pdf_relationship(from_id: int, to_id: int, relationship_type: str, confidence: float) -> bool:
     """Create a relationship edge between two PDFs"""
-    result = run_helix_query("relatePDFs", {
-        "from_id": from_id,
-        "to_id": to_id,
-        "relationship_type": relationship_type,
-        "confidence": confidence
-    })
-    return result["success"]
+    try:
+        db.relatePDFs(
+            from_id=from_id,
+            to_id=to_id,
+            relationship_type=relationship_type,
+            confidence=confidence
+        )
+        return True
+    except Exception as e:
+        print(f"Error creating relationship: {e}")
+        return False
 
 
 app = FastAPI()
@@ -251,19 +237,12 @@ async def get_pdfs():
 async def get_pdf_connections(pdf_id: int):
     """Get all connections for a specific PDF"""
     try:
-        result = run_helix_query("getRelatedPDFs", {"pdf_id": pdf_id})
-        if result["success"]:
-            connections = json.loads(result["output"]) if result["output"] else []
-            return {
-                "status": "success",
-                "pdf_id": pdf_id,
-                "connections": connections
-            }
-        else:
-            return {
-                "status": "error",
-                "message": result.get("error", "Failed to fetch connections")
-            }
+        connections = db.getRelatedPDFs(pdf_id=pdf_id)
+        return {
+            "status": "success",
+            "pdf_id": pdf_id,
+            "connections": connections if isinstance(connections, list) else []
+        }
     except Exception as e:
         return {
             "status": "error",

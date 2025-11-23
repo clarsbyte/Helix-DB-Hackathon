@@ -13,7 +13,13 @@
       "Bash(python:*)",
       "Bash(chcp 65001)",
       "Bash(helix delete:*)",
-      "Bash(cat:*)"
+      "Bash(cat:*)",
+      "Bash(docker --version:*)",
+      "Bash(docker logs:*)",
+      "Bash(docker start:*)",
+      "Bash(helix check:*)",
+      "Bash(helix prune:*)",
+      "Bash(tee:*)"
     ],
     "deny": [],
     "ask": []

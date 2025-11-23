@@ -1,6 +1,6 @@
 [project]
-name = "helix"
-queries = "./db/"
+name = "pdf_graph"
+queries = "."
 
 [local.dev]
 port = 6969

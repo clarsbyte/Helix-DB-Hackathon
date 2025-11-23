@@ -1,0 +1,21 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git commit:*)",
+      "Bash(helix --help:*)",
+      "Bash(helix status:*)",
+      "Bash(helix build:*)",
+      "Bash(helix push:*)",
+      "Bash(curl:*)",
+      "Bash(helix stop:*)",
+      "Bash(python import_pdf.py:*)",
+      "Bash(set GEMINI_API_KEY=AIzaSyCLskj0_20APsfHIwiBSMbHnkjTbrKdcwI)",
+      "Bash(python:*)",
+      "Bash(chcp 65001)",
+      "Bash(helix delete:*)",
+      "Bash(cat:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

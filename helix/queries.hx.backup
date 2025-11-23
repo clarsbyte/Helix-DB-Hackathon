@@ -1,0 +1,74 @@
+// Query to add a note with automatic embedding generation
+QUERY addNote(title: String, content: String, note_id: I32, created_at: String) =>
+    // Create the note node
+    note <- AddN<Note>({
+        title: title,
+        content: content,
+        note_id: note_id,
+        created_at: created_at
+    })
+
+    // Create embedding using Helix's built-in Embed() function
+    // Combine title and content for better semantic search
+    combined_text <- title + " " + content
+    embedding <- AddV<NoteEmbedding>(Embed(combined_text), {
+        title: title,
+        content: content,
+        note_id: note_id
+    })
+
+    // Link note to its embedding
+    AddE<HasEmbedding>::From(note)::To(embedding)
+
+    RETURN note
+
+
+// Query to search notes by semantic similarity
+QUERY searchNotes(query: String, top_k: I32) =>
+    // Use Embed() to convert the query string to a vector
+    // SearchV will find the most similar note embeddings
+    results <- SearchV<NoteEmbedding>(Embed(query), top_k)
+
+    RETURN results::{
+        title,
+        content,
+        note_id
+    }
+
+
+// Query to get all notes
+QUERY getAllNotes() =>
+    notes <- N<Note>
+    RETURN notes::{
+        title,
+        content,
+        note_id,
+        created_at
+    }
+
+
+// Query to get a specific note by ID
+QUERY getNoteById(note_id: I32) =>
+    note <- N<Note>({note_id: note_id})
+    RETURN note::{
+        title,
+        content,
+        note_id,
+        created_at
+    }
+
+
+// Query to search and get note with its embedding details
+QUERY searchNotesDetailed(query: String, top_k: I32) =>
+    // Search by embedding
+    embeddings <- SearchV<NoteEmbedding>(Embed(query), top_k)
+
+    // Get the associated notes
+    notes <- embeddings::In<HasEmbedding>
+
+    RETURN notes::{
+        title,
+        content,
+        note_id,
+        created_at
+    }

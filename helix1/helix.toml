@@ -1,7 +1,6 @@
 [project]
-name = "helix"
-queries = "./db/"
-container_runtime = "docker"
+name = "pdf_graph"
+queries = "."
 
 [local.dev]
 port = 6969

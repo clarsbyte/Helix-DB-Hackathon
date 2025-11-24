@@ -19,7 +19,8 @@
       "Bash(docker start:*)",
       "Bash(helix check:*)",
       "Bash(helix prune:*)",
-      "Bash(tee:*)"
+      "Bash(tee:*)",
+      "Bash(npm run dev:*)"
     ],
     "deny": [],
     "ask": []

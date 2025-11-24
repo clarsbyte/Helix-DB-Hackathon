@@ -4,44 +4,41 @@ import { GraphView } from '@/components/GraphView';
 import { VoiceSidebar } from '@/components/VoiceSidebar';
 import { mockGraphData } from '@/data/mockGraphData';
 import { GraphControlProvider } from '@/contexts/GraphControlContext';
-// import { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 
 // Toggle this to switch between mock data and real Helix data
-const USE_HELIX_DATA = false;
+const USE_HELIX_DATA = true;
 
 export default function DashboardPage() {
-  // MOCK DATA MODE (currently active)
-  const graphData = mockGraphData;
+  // HELIX DATA MODE (active)
+  const [graphData, setGraphData] = useState<any>(USE_HELIX_DATA ? null : mockGraphData);
+  const [loading, setLoading] = useState(USE_HELIX_DATA);
 
-  // HELIX DATA MODE (uncomment to activate)
-  // const [graphData, setGraphData] = useState<any>(null);
-  // const [loading, setLoading] = useState(true);
+  useEffect(() => {
+    if (!USE_HELIX_DATA) return;
 
-  // useEffect(() => {
-  //   if (!USE_HELIX_DATA) return;
-  //
-  //   async function fetchGraphData() {
-  //     try {
-  //       const response = await fetch('/api/graph');
-  //       const data = await response.json();
-  //       setGraphData(data);
-  //     } catch (error) {
-  //       console.error('Failed to fetch graph data:', error);
-  //       setGraphData({ nodes: [], links: [] });
-  //     } finally {
-  //       setLoading(false);
-  //     }
-  //   }
-  //   fetchGraphData();
-  // }, []);
+    async function fetchGraphData() {
+      try {
+        const response = await fetch('/api/graph');
+        const data = await response.json();
+        setGraphData(data);
+      } catch (error) {
+        console.error('Failed to fetch graph data:', error);
+        setGraphData({ nodes: [], links: [] });
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchGraphData();
+  }, []);
 
-  // if (USE_HELIX_DATA && loading) {
-  //   return (
-  //     <main className="flex w-full h-screen bg-[#05070d] items-center justify-center">
-  //       <div className="text-emerald-400 text-lg">Loading Universe...</div>
-  //     </main>
-  //   );
-  // }
+  if (USE_HELIX_DATA && loading) {
+    return (
+      <main className="flex w-full h-screen bg-[#05070d] items-center justify-center">
+        <div className="text-emerald-400 text-lg">Loading Universe...</div>
+      </main>
+    );
+  }
 
   return (
     <GraphControlProvider>

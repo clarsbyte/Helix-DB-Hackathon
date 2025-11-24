@@ -52,10 +52,18 @@ QUERY relatePDFs(from_id: I32, to_id: I32, relationship_type: String, confidence
     }
 
 
-// Get all PDFs related to a specific PDF
+// Get all PDFs related to a specific PDF (both incoming and outgoing edges)
 QUERY getRelatedPDFs(pdf_id: I32) =>
     pdf <- N<PDF>({pdf_id: pdf_id})
-    related <- pdf::Out<RelatedTo>
+
+    // Get outgoing relationships
+    outgoing <- pdf::Out<RelatedTo>
+
+    // Get incoming relationships
+    incoming <- pdf::In<RelatedTo>
+
+    // Combine both directions
+    related <- outgoing | incoming
 
     RETURN related::{
         pdf_id,
@@ -68,7 +76,11 @@ QUERY getRelatedPDFs(pdf_id: I32) =>
 // Get the full graph of connections for a PDF (with edge properties)
 QUERY getPDFConnections(pdf_id: I32) =>
     pdf <- N<PDF>({pdf_id: pdf_id})
-    related <- pdf::Out<RelatedTo>
+
+    // Get both incoming and outgoing relationships
+    outgoing <- pdf::Out<RelatedTo>
+    incoming <- pdf::In<RelatedTo>
+    related <- outgoing | incoming
 
     RETURN related::{
         pdf_id,

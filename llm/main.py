@@ -73,11 +73,7 @@ connection_agent = Agent(
 
 db = helix.Client(local=True, verbose=True)
 
-# Initialize the database with our schema
-try:
-    db.compile()
-except Exception as e:
-    print(f"Database compile warning: {e}")
+# Database is initialized when Client is created
 
 def extract_pdf_text(pdf_path: str) -> str:
     """Extract text content from a PDF file."""
@@ -92,10 +88,21 @@ def extract_pdf_text(pdf_path: str) -> str:
 def get_all_pdfs() -> List[dict]:
     """Get all PDFs from the database"""
     try:
-        result = db.getAllPDFs()
+        result = db.query("getAllPDFs", {})
+        print(f"DEBUG - Raw result from getAllPDFs: {result}")
+        print(f"DEBUG - Result type: {type(result)}")
+
+        # Handle the nested structure returned by Helix
+        if isinstance(result, list) and len(result) > 0:
+            # Check if result is wrapped in a 'pdfs' key
+            if isinstance(result[0], dict) and 'pdfs' in result[0]:
+                return result[0]['pdfs']
+
         return result if isinstance(result, list) else []
     except Exception as e:
         print(f"Error getting PDFs: {e}")
+        import traceback
+        traceback.print_exc()
         return []
 
 
@@ -103,31 +110,73 @@ def add_pdf_to_db(pdf_id: int, title: str, summary: str, filename: str) -> bool:
     """Add a PDF to the Helix database"""
     try:
         upload_date = datetime.now().isoformat()
-        db.addPDF(
-            pdf_id=pdf_id,
-            title=title,
-            summary=summary,
-            filename=filename,
-            upload_date=upload_date
-        )
+        print(f"DEBUG - Adding PDF with id={pdf_id}, title={title}")
+        result = db.query("addPDF", {
+            "pdf_id": pdf_id,
+            "title": title,
+            "summary": summary,
+            "filename": filename,
+            "upload_date": upload_date
+        })
+        print(f"DEBUG - Add PDF result: {result}")
         return True
     except Exception as e:
         print(f"Error adding PDF: {e}")
+        import traceback
+        traceback.print_exc()
         return False
 
 
 def create_pdf_relationship(from_id: int, to_id: int, relationship_type: str, confidence: float) -> bool:
-    """Create a relationship edge between two PDFs"""
+    """Create bidirectional relationship edges between two PDFs"""
+    forward_success = False
+    reverse_success = False
+
     try:
-        db.relatePDFs(
-            from_id=from_id,
-            to_id=to_id,
-            relationship_type=relationship_type,
-            confidence=confidence
-        )
-        return True
+        print(f"DEBUG - Creating bidirectional relationship: {from_id} <-> {to_id} ({relationship_type}, {confidence})")
+
+        # Create forward relationship
+        try:
+            result1 = db.query("relatePDFs", {
+                "from_id": from_id,
+                "to_id": to_id,
+                "relationship_type": relationship_type,
+                "confidence": confidence
+            })
+            print(f"DEBUG - Forward relationship created ({from_id} -> {to_id}): {result1}")
+            forward_success = True
+        except Exception as e:
+            print(f"Error creating forward relationship ({from_id} -> {to_id}): {e}")
+            import traceback
+            traceback.print_exc()
+
+        # Create reverse relationship
+        try:
+            result2 = db.query("relatePDFs", {
+                "from_id": to_id,
+                "to_id": from_id,
+                "relationship_type": relationship_type,
+                "confidence": confidence
+            })
+            print(f"DEBUG - Reverse relationship created ({to_id} -> {from_id}): {result2}")
+            reverse_success = True
+        except Exception as e:
+            print(f"Error creating reverse relationship ({to_id} -> {from_id}): {e}")
+            import traceback
+            traceback.print_exc()
+
+        # Return True only if both edges were created successfully
+        if forward_success and reverse_success:
+            print(f"DEBUG - Both edges created successfully for {from_id} <-> {to_id}")
+            return True
+        else:
+            print(f"DEBUG - Edge creation incomplete: forward={forward_success}, reverse={reverse_success}")
+            return False
+
     except Exception as e:
-        print(f"Error creating relationship: {e}")
+        print(f"Error creating bidirectional relationship: {e}")
+        import traceback
+        traceback.print_exc()
         return False
 
 
@@ -156,9 +205,11 @@ async def process_pdf(pdf_path: str = Body(..., embed=True)):
 
         # Get all existing PDFs from the database
         existing_pdfs = get_all_pdfs()
+        print(f"DEBUG - Existing PDFs: {existing_pdfs}")
 
         # Generate a new PDF ID
         new_pdf_id = max([pdf.get("pdf_id", 0) for pdf in existing_pdfs], default=0) + 1
+        print(f"DEBUG - Generated new PDF ID: {new_pdf_id}")
 
         # Find connections to existing PDFs using AI
         connections = []
@@ -237,13 +288,24 @@ async def get_pdfs():
 async def get_pdf_connections(pdf_id: int):
     """Get all connections for a specific PDF"""
     try:
-        connections = db.getRelatedPDFs(pdf_id=pdf_id)
+        connections = db.query("getRelatedPDFs", {"pdf_id": pdf_id})
+        print(f"DEBUG - Raw connections result: {connections}")
+
+        # Handle the nested structure returned by Helix
+        if isinstance(connections, list) and len(connections) > 0:
+            # Check if result is wrapped in a 'related' key
+            if isinstance(connections[0], dict) and 'related' in connections[0]:
+                connections = connections[0]['related']
+
         return {
             "status": "success",
             "pdf_id": pdf_id,
             "connections": connections if isinstance(connections, list) else []
         }
     except Exception as e:
+        print(f"Error getting connections: {e}")
+        import traceback
+        traceback.print_exc()
         return {
             "status": "error",
             "message": str(e)

@@ -2,6 +2,10 @@
 
 N-Mapper is a voice-first interface that turns a live Canvas course into a navigable node map. The app pulls course data from the Canvas API, stores it in a local Helix/Heelings DB instance, and renders a circular “warp” of interconnected nodes you can jump between by voice or by URL. It’s one unified graph with colored sub-graphs per course (e.g., Math 18 is red, Math 20C is blue), so each course remains visually distinct while sharing the same canvas. The feel should be closer to Obsidian’s Graph View: a dense, zoomable warp where scrolling/panning reveals more detail, lets you hunt for nodes, and voice search snaps you to the right spot.
 
+
+https://github.com/user-attachments/assets/0bc2c97b-6912-4f9a-b5d8-a85da806cb8f
+
+
 ## What it does
 
 - Connects to the Canvas API to fetch real course data (names, structure, relationships).

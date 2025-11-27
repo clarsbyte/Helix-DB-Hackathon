@@ -4,6 +4,10 @@ N-Mapper is a voice-first interface that turns a live Canvas course into a navig
 
 **NOTE** : Check Helix branch for Helix implementation!
 
+
+https://github.com/user-attachments/assets/b2e0edef-aebb-45da-b272-ea6d8341e69f
+
+
 ## What it does
 
 - Connects to the Canvas API to fetch real course data (names, structure, relationships).

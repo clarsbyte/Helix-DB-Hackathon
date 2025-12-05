@@ -1,6 +1,7 @@
 [project]
 name = "helix"
 queries = "./db/"
+container_runtime = "docker"
 
 [local.dev]
 port = 6969

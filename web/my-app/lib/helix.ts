@@ -7,7 +7,7 @@ const HELIX_URL = process.env.NEXT_PUBLIC_HELIX_URL || 'http://localhost:6969';
 
 export async function queryHelix(queryName: string, args: Record<string, any> = {}) {
   try {
-    const response = await fetch(`${HELIX_URL}/query/${queryName}`, {
+    const response = await fetch(`${HELIX_URL}/${queryName}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

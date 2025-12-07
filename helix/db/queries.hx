@@ -1,13 +1,14 @@
 // ========== PDF MANAGEMENT ==========
 
 // Add a new PDF document
-QUERY addPDF(pdf_id: I32, title: String, summary: String, filename: String, upload_date: String) =>
+QUERY addPDF(pdf_id: I32, title: String, summary: String, filename: String, upload_date: String, user_id: String) =>
     pdf <- AddN<PDF>({
         pdf_id: pdf_id,
         title: title,
         summary: summary,
         filename: filename,
-        upload_date: upload_date
+        upload_date: upload_date,
+        user_id: user_id
     })
     RETURN pdf
 
@@ -20,7 +21,8 @@ QUERY getAllPDFs() =>
         title,
         summary,
         filename,
-        upload_date
+        upload_date,
+        user_id
     }
 
 
@@ -32,7 +34,21 @@ QUERY getPDF(pdf_id: I32) =>
         title,
         summary,
         filename,
-        upload_date
+        upload_date,
+        user_id
+    }
+
+
+// Get all PDFs (filter by user_id in application code)
+QUERY getPDFsByUser(user_id: String) =>
+    pdfs <- N<PDF>
+    RETURN pdfs::{
+        pdf_id,
+        title,
+        summary,
+        filename,
+        upload_date,
+        user_id
     }
 
 

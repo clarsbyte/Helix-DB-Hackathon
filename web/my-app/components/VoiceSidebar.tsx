@@ -103,13 +103,13 @@ export function VoiceSidebar() {
               type: 'function-call-result',
               functionCallId: message.functionCallId,
               result: { success: true, node: { id: node.id, name: node.name, type: node.type } }
-            });
+            } as any);
           } else {
             vapi?.send({
               type: 'function-call-result',
               functionCallId: message.functionCallId,
               result: { success: false, message: 'Node not found' }
-            });
+            } as any);
           }
           break;
 
@@ -120,7 +120,7 @@ export function VoiceSidebar() {
             type: 'function-call-result',
             functionCallId: message.functionCallId,
             result: { success: true }
-          });
+          } as any);
           break;
 
         case 'resetView':
@@ -129,7 +129,7 @@ export function VoiceSidebar() {
             type: 'function-call-result',
             functionCallId: message.functionCallId,
             result: { success: true }
-          });
+          } as any);
           break;
 
         case 'getCourseInfo':
@@ -152,13 +152,13 @@ export function VoiceSidebar() {
                 moduleCount: modules.length,
                 modules: modules.map(m => m.name)
               }
-            });
+            } as any);
           } else {
             vapi?.send({
               type: 'function-call-result',
               functionCallId: message.functionCallId,
               result: { success: false, message: 'Course not found' }
-            });
+            } as any);
           }
           break;
 
@@ -261,7 +261,7 @@ Be conversational and helpful. When the user asks about a course or assignment, 
               }
             }
           ]
-        },
+        } as any,
         voice: {
           provider: 'playht',
           voiceId: 'jennifer'

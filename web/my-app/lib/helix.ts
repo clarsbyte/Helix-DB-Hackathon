@@ -32,6 +32,10 @@ export async function getAllPDFs() {
   return queryHelix('getAllPDFs');
 }
 
+export async function getPDFsByUser(userId: string) {
+  return queryHelix('getPDFsByUser', { user_id: userId });
+}
+
 export async function getPDF(pdfId: number) {
   return queryHelix('getPDF', { pdf_id: pdfId });
 }

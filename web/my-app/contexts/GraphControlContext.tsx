@@ -13,7 +13,7 @@ interface GraphControlContextType {
 const GraphControlContext = createContext<GraphControlContextType | null>(null);
 
 export function GraphControlProvider({ children }: { children: ReactNode }) {
-  const graphRef = useRef<any>();
+  const graphRef = useRef<any>(null);
 
   const zoomToNode = (nodeId: string) => {
     if (!graphRef.current) return;

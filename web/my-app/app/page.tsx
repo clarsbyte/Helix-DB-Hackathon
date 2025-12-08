@@ -2,9 +2,13 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import FileUploadModal from "@/components/FileUploadModal";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function Home() {
   const [scale, setScale] = useState(0.8);
+  const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
+  const { signOutUser } = useAuth();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -41,12 +45,46 @@ export default function Home() {
                 Canvas voice graph
               </span>
             </div>
-            <Link
-              href="/app"
-              className="rounded-xl border border-white/14 bg-white/6 px-5 py-2 text-white transition hover:-translate-y-0.5 hover:border-emerald-200/80 hover:text-emerald-100"
-            >
-              Dashboard →
-            </Link>
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => setIsUploadModalOpen(true)}
+                className="rounded-xl border border-emerald-400/30 bg-emerald-500/10 px-4 py-2 text-sm text-emerald-300 transition hover:-translate-y-0.5 hover:border-emerald-300 hover:bg-emerald-500/20"
+              >
+                📤 Upload PDFs
+              </button>
+              {/* Always show login/signup on landing page - auth is checked on /app route */}
+              {false ? (
+                <>
+                  <Link
+                    href="/app"
+                    className="rounded-xl border border-white/14 bg-white/6 px-5 py-2 text-white transition hover:-translate-y-0.5 hover:border-emerald-200/80 hover:text-emerald-100"
+                  >
+                    Dashboard →
+                  </Link>
+                  <button
+                    onClick={() => signOutUser()}
+                    className="rounded-xl border border-red-400/30 bg-red-500/10 px-4 py-2 text-sm text-red-300 transition hover:-translate-y-0.5 hover:border-red-300 hover:bg-red-500/20"
+                  >
+                    Sign Out
+                  </button>
+                </>
+              ) : (
+                <>
+                  <Link
+                    href="/login"
+                    className="rounded-xl border border-white/14 bg-white/6 px-5 py-2 text-white transition hover:-translate-y-0.5 hover:border-emerald-200/80 hover:text-emerald-100"
+                  >
+                    Login
+                  </Link>
+                  <Link
+                    href="/signup"
+                    className="rounded-xl bg-emerald-400 px-5 py-2 text-emerald-950 font-semibold transition hover:-translate-y-0.5"
+                  >
+                    Sign Up
+                  </Link>
+                </>
+              )}
+            </div>
           </div>
         </nav>
 
@@ -353,6 +391,11 @@ export default function Home() {
           </div>
         </section>
       </div>
+
+      <FileUploadModal
+        isOpen={isUploadModalOpen}
+        onClose={() => setIsUploadModalOpen(false)}
+      />
     </main>
   );
 }

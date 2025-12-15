@@ -41,9 +41,10 @@ export default function FileUploadModal({ isOpen, onClose }: FileUploadModalProp
     try {
       setCurrentFileIndex(index);
 
-      // Step 1: Upload file to server
+      // Step 1: Upload file to S3 via server
       const formData = new FormData();
       formData.append("file", file);
+      formData.append("user_id", user?.userId || "anonymous");
 
       const uploadResponse = await fetch(`${API_BASE_URL}/upload/`, {
         method: "POST",
@@ -60,14 +61,14 @@ export default function FileUploadModal({ isOpen, onClose }: FileUploadModalProp
         throw new Error(uploadData.message || "Upload failed");
       }
 
-      // Step 2: Process the uploaded PDF using the file path
+      // Step 2: Process the uploaded PDF using the S3 key
       const processResponse = await fetch(`${API_BASE_URL}/process-pdf/`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          pdf_path: uploadData.file_path,
+          s3_key: uploadData.s3_key,
           user_id: user?.userId || "anonymous",
         }),
       });

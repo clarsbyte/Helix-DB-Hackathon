@@ -39,6 +39,12 @@ QUERY getPDF(pdf_id: I32) =>
     }
 
 
+// Delete a PDF by ID
+QUERY deletePDF(pdf_id: I32) =>
+    DROP N<PDF>({pdf_id: pdf_id})
+    RETURN "success"
+
+
 // Get all PDFs (filter by user_id in application code)
 QUERY getPDFsByUser(user_id: String) =>
     pdfs <- N<PDF>

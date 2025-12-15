@@ -51,7 +51,7 @@ export default function DashboardPage() {
         <main className="flex w-full h-screen bg-[#05070d] overflow-hidden font-sans selection:bg-white/15">
           {/* Left: Graph Visualization */}
           <div className="flex-1 relative">
-            <GraphView data={graphData} />
+            <GraphView data={graphData} onGraphUpdate={fetchGraphData} />
 
             {/* Minimal Header */}
             <div className="absolute top-7 left-7 pointer-events-none z-10">
